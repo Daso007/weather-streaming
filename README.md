@@ -1,54 +1,166 @@
-Here's a summary of the real-time streaming data engineering project:
-Project Objective:
-To build an end-to-end real-time weather reporting system.
-The system provides continuously updated weather information (temperature, conditions, air quality) for a chosen location.
-It includes a crucial feature for sending real-time email alerts in case of extreme weather conditions.
-Core Architecture & Components:
-Data Source:
-Uses the WeatherAPI.com free tier, which offers 1 million API calls per month.
-Data Ingestion (Comparative Approach, settling on Azure Functions):
-Initially explored both Azure Databricks and Azure Functions to ingest data from the Weather API and send it to Azure Event Hub.
-An architectural decision was made to use Azure Functions for this project due to significant cost savings and sufficient performance for the given use case (simple API calls and data forwarding). The Azure Function App runs on a timer trigger (e.g., every 30 seconds) to fetch and send data.
-Data Streaming:
-Azure Event Hub is used as the central data streaming service to handle incoming real-time weather events from Azure Functions.
-Real-time Data Processing & Loading (Microsoft Fabric):
-Weather data is streamed from Event Hub into Microsoft Fabric.
-Eventstream (in Fabric): An Eventstream pipeline is created to:
-Connect to Azure Event Hub as an external source.
-Continuously pull streaming weather data.
-Load the data into a KQL Database (Kusto).
-Eventhouse & KQL Database (in Fabric): An Eventhouse is created, which automatically provisions a KQL Database. This database is used to store the streaming time-series weather data. A table (e.g., "weather-table") is defined to hold the ingested records.
-Data Reporting & Visualization:
-Power BI is used to create interactive, real-time dashboards.
-Reports are built on top of the data in the KQL Database.
-Demonstrated creating reports both directly in the Power BI service (Fabric online) using Direct Query for real-time page refreshes, and using Power BI Desktop with Import Mode for more data transformation flexibility (requiring scheduled or manual refreshes).
-KQL Query Sets (in Fabric): Used to query data from the KQL Database, acting like views, and form the basis for Power BI reports. A trick was shown to convert SQL queries to KQL using the explain feature in Fabric.
-Real-time Alerting:
-Data Activator (in Fabric): This component is configured to:
-Monitor the KQL Database for specific alert conditions (e.g., non-empty 'alerts' field in the weather data received within the last minute).
-Run KQL queries periodically (e.g., every 1 minute) to check for these conditions.
-Trigger real-time email notifications when alerts are detected.
-Security:
-Azure Key Vault is used to securely store and manage sensitive information like API keys and connection strings.
-Azure services (Databricks, Functions) are configured to retrieve these secrets securely from Key Vault, often using Managed Identities for Azure Functions.
-Cost Management:
-A key theme was cost optimization, notably in the decision to use Azure Functions over Azure Databricks for the ingestion part of this specific project.
-The Azure Pricing Calculator was referenced to estimate resource costs.
-Project Implementation Journey (Key Milestones):
-Environment Setup:
-Configuring the WeatherAPI.com data source and obtaining an API key.
-Creating all necessary Azure resources within a dedicated Resource Group (e.g., Azure Function App, Event Hub, Key Vault, Microsoft Fabric capacity/trial).
-Data Ingestion Development:
-Detailed step-by-step implementation of data ingestion scripts in Python, first within Azure Databricks and then adapted for Azure Functions. This included API interaction, data parsing, and sending events to Event Hub.
-Configuring authentication and authorization for services to interact (e.g., Function App access to Event Hub and Key Vault via Managed Identity).
-Microsoft Fabric Integration:
-Setting up the Eventhouse and KQL Database.
-Building the Eventstream pipeline to connect Event Hub to the KQL Database.
-Reporting & Analytics:
-Writing KQL queries using Query Sets.
-Developing Power BI reports for real-time data visualization.
-Alerting Setup:
-Creating KQL queries to identify alert conditions.
-Configuring Data Activator to monitor these conditions and send email alerts.
-End-to-End Testing:
-Verifying the entire pipeline, ensuring data flows from the Weather API through Azure Functions, Event Hub, Fabric Eventstream, KQL Database, and finally to Power BI reports and Data Activator alerts.
+🌦️ Real-Time Weather Reporting System (Streaming Data Engineering Project)
+🚀 Project Objective
+To build an end-to-end real-time weather reporting system that continuously updates weather metrics such as:
+
+🌡️ Temperature
+
+🌬️ Conditions
+
+🧪 Air Quality
+
+It also includes real-time email alerts for extreme weather conditions.
+
+🧱 Core Architecture & Components
+🔗 Data Source
+API: WeatherAPI.com (Free tier – 1 million API calls/month)
+
+⚙️ Data Ingestion (Comparative Approach)
+Explored two ingestion options:
+
+Azure Databricks
+
+Azure Functions ✅ (Final choice)
+
+Why Azure Functions?
+
+Cost-effective
+
+Timer-triggered every 30 seconds
+
+Lightweight for simple API polling and forwarding
+
+🔄 Data Streaming
+Service Used: Azure Event Hub
+
+Purpose: Receives real-time weather events from Azure Functions
+
+🔥 Real-Time Processing in Microsoft Fabric
+📡 Eventstream Pipeline
+Connects Event Hub to Fabric
+
+Continuously pulls weather data
+
+Loads into a KQL Database
+
+🏠 Eventhouse & KQL Database
+Automatically provisioned with Eventstream
+
+Stores time-series weather data
+
+Table: weather_table (schema for ingested records)
+
+📊 Data Reporting & Visualization
+🔍 Power BI Integration
+Real-time dashboards using:
+
+Direct Query (Fabric online) for live updates
+
+Import Mode (Power BI Desktop) for richer transformation
+
+🔎 KQL Query Sets
+Act like SQL Views
+
+Support Power BI reporting
+
+Can convert SQL to KQL using EXPLAIN in Fabric
+
+🔔 Real-Time Alerting
+📬 Data Activator (in Microsoft Fabric)
+Monitors KQL Database for:
+
+Non-empty alerts field
+
+Records received within the last minute
+
+Triggers real-time email alerts
+
+Runs checks every 1 minute using KQL
+
+🔐 Security Practices
+🔑 Azure Key Vault stores:
+
+API Keys
+
+Connection Strings
+
+🛡️ Secure access with Managed Identity for Azure Functions
+
+💸 Cost Optimization
+Azure Functions selected over Databricks for ingestion to reduce cost
+
+Estimated using Azure Pricing Calculator
+
+🛠️ Project Implementation Journey
+🧰 Environment Setup
+Registered at WeatherAPI.com and obtained API key
+
+Created Azure Resources:
+
+Azure Function App
+
+Event Hub
+
+Key Vault
+
+Microsoft Fabric Trial/Capacity
+
+🧪 Data Ingestion Development
+Developed and tested ingestion code in:
+
+Azure Databricks (initially)
+
+Azure Functions (final version)
+
+Features:
+
+API call logic
+
+JSON parsing
+
+Event Hub message sending
+
+Configured service access via Managed Identity
+
+📈 Microsoft Fabric Integration
+Setup Eventstream to move data from Event Hub to KQL Database
+
+Created and configured Eventhouse
+
+📉 Reporting & Analytics
+Wrote KQL queries for metrics and alerts
+
+Built dashboards in Power BI
+
+📨 Alerting Mechanism
+Wrote KQL queries to detect extreme weather
+
+Configured Data Activator to send emails in real-time
+
+✅ End-to-End Testing
+Verified entire flow:
+Weather API → Azure Functions → Event Hub → Microsoft Fabric (Eventstream & KQL DB) → Power BI → Data Activator (Email Alerts)
+
+📁 Tech Stack
+Layer	Tools/Services
+Data Source	WeatherAPI.com
+Ingestion	Azure Functions
+Streaming	Azure Event Hub
+Processing	Microsoft Fabric (Eventstream, KQL DB)
+Visualization	Power BI
+Alerting	Microsoft Fabric - Data Activator
+Security	Azure Key Vault, Managed Identities
+
+🙌 Acknowledgments
+Microsoft Fabric team for public documentation and examples
+
+WeatherAPI for offering a generous free tier
+
+Azure Pricing Calculator for guiding cost decisions
+
+📬 Contact
+If you’d like to know more about this project or explore the code/configurations, feel free to reach out:
+
+Dibyajyoti Datta
+📧 dibyajyotidatta410@gmail.com
+🌐 LinkedIn
+
